@@ -9,6 +9,8 @@ export interface Config {
   model: string;
   effort: Effort;
   claudeCommand: string;
+  /** Writes the data of every call to Claude in the folder of the book. */
+  trace: boolean;
 }
 
 const efforts: Effort[] = ['low', 'medium', 'high', 'xhigh', 'max'];
@@ -32,5 +34,6 @@ export function readConfig(env: NodeJS.ProcessEnv): Config {
     model: env.CLAUDE_MODEL ?? 'claude-opus-5-5',
     effort,
     claudeCommand: env.CLAUDE_COMMAND ?? 'claude',
+    trace: ['1', 'true', 'yes', 'on'].includes((env.TRACE ?? '').toLowerCase()),
   };
 }

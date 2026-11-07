@@ -8,6 +8,7 @@ import type {
   Page,
 } from '../../shared/types.js';
 import type { ModelClient } from '../model/model-client.js';
+import type { Tracer } from '../model/trace.js';
 import { type BookStore, getPath } from '../store/book-store.js';
 import {
   authorsBlocks,
@@ -24,6 +25,12 @@ import {
   pageOutputSchema,
 } from './schemas.js';
 
+export interface StoryServiceOptions {
+  newId?: () => string;
+  /** Writes what goes to Claude and back, if tracing is on. */
+  tracer?: Tracer;
+}
+
 export class NotFoundError extends Error {}
 
 export interface ChooseResult {
@@ -37,22 +44,32 @@ export class StoryService {
   private readonly inFlight = new Map<string, Promise<ChooseResult>>();
   private readonly authorCache = new Map<string, AuthorSuggestion[]>();
 
+  private readonly newId: () => string;
+  private readonly tracer: Tracer | undefined;
+
   constructor(
     private readonly store: BookStore,
     private readonly model: ModelClient,
-    private readonly newId: () => string = () => randomUUID().slice(0, 8),
-  ) {}
+    options: StoryServiceOptions = {},
+  ) {
+    this.newId = options.newId ?? (() => randomUUID().slice(0, 8));
+    this.tracer = options.tracer;
+  }
 
   async createBook(settings: BookSettings): Promise<Book> {
+    // The ID is made first, so that the trace of the opening is in the
+    // folder of the book, also when the opening fails.
+    const bookId = this.newId();
     const out = await this.model.generate({
       purpose: 'opening',
       system: openingSystemPrompt(settings),
       blocks: openingBlocks(),
       schema: openingOutputSchema,
+      trace: this.tracer?.start(bookId, 'opening'),
     });
     const page = this.makePage(out.page, null, null, null);
     const book: Book = {
-      id: this.newId(),
+      id: bookId,
       title: out.title,
       createdAt: new Date().toISOString(),
       settings,
@@ -152,6 +169,7 @@ export class StoryService {
       system: bookSystemPrompt(book),
       blocks: pathBlocks(path, choiceIndex),
       schema: pageOutputSchema,
+      trace: this.tracer?.start(bookId, `page-${path.length + 1}`),
     });
     const page = this.makePage(
       out,
@@ -178,6 +196,7 @@ export class StoryService {
       blocks: authorsBlocks(language, genre, style),
       schema: authorsOutputSchema,
       effort: 'low',
+      trace: this.tracer?.start(null, 'authors'),
     });
     this.authorCache.set(key, out.authors);
     return out.authors;

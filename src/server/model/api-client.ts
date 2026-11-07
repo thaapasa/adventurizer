@@ -1,8 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
+import type { BetaMessageStreamParams } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 
 import type { Effort, ModelClient, ModelRequest } from './model-client.js';
-import { ModelError } from './model-client.js';
+import { ModelError, promptMarkdown } from './model-client.js';
 
 export interface ApiClientOptions {
   model: string;
@@ -22,37 +23,48 @@ export class ApiModelClient implements ModelClient {
     const format = betaZodOutputFormat(request.schema);
     const lastBlock = request.blocks.length - 1;
     const started = Date.now();
-    const message = await this.client.beta.messages
-      .stream({
-        model: this.options.model,
-        max_tokens: 32000,
-        // If the model declines, for example on a grim scene, the API reruns
-        // the request on the fallback model that fits the reason.
-        betas: ['server-side-fallback-2026-07-01'],
-        fallbacks: 'default',
-        output_config: {
-          effort: request.effort ?? this.options.effort,
-          format: { type: 'json_schema', schema: format.schema },
+    const params: BetaMessageStreamParams = {
+      model: this.options.model,
+      max_tokens: 32000,
+      // If the model declines, for example on a grim scene, the API reruns
+      // the request on the fallback model that fits the reason.
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      output_config: {
+        effort: request.effort ?? this.options.effort,
+        format: { type: 'json_schema', schema: format.schema },
+      },
+      system: [
+        {
+          type: 'text',
+          text: request.system,
+          cache_control: { type: 'ephemeral' },
         },
-        system: [
-          {
-            type: 'text',
-            text: request.system,
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
-        messages: [
-          {
-            role: 'user',
-            content: request.blocks.map((text, i) =>
-              i === lastBlock
-                ? { type: 'text', text, cache_control: { type: 'ephemeral' } }
-                : { type: 'text', text },
-            ),
-          },
-        ],
-      })
-      .finalMessage();
+      ],
+      messages: [
+        {
+          role: 'user',
+          content: request.blocks.map((text, i) =>
+            i === lastBlock
+              ? { type: 'text', text, cache_control: { type: 'ephemeral' } }
+              : { type: 'text', text },
+          ),
+        },
+      ],
+    };
+    await request.trace?.write(
+      'prompt.md',
+      promptMarkdown(request, format.schema),
+    );
+    await request.trace?.write('request.json', params);
+    let message: Anthropic.Beta.BetaMessage;
+    try {
+      message = await this.client.beta.messages.stream(params).finalMessage();
+    } catch (e) {
+      await request.trace?.write('error.json', errorData(e));
+      throw e;
+    }
+    await request.trace?.write('response.json', message);
 
     const u = message.usage;
     console.log(
@@ -90,4 +102,11 @@ export function parseOutput<T>(text: string, request: ModelRequest<T>): T {
     );
   }
   return result.data;
+}
+
+function errorData(e: unknown): unknown {
+  if (e instanceof Anthropic.APIError) {
+    return { status: e.status, message: e.message, error: e.error };
+  }
+  return { message: String(e) };
 }

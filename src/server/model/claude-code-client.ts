@@ -7,7 +7,7 @@ import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
 
 import type { Effort, ModelClient, ModelRequest } from './model-client.js';
-import { ModelError } from './model-client.js';
+import { ModelError, promptMarkdown } from './model-client.js';
 
 export interface ClaudeCodeOptions {
   model: string;
@@ -67,18 +67,43 @@ export class ClaudeCodeModelClient implements ModelClient {
       const systemFile = path.join(dir, 'system.md');
       await writeFile(systemFile, request.system, 'utf8');
       const args = buildArgs(request, this.options, systemFile);
+      const command = this.options.command ?? 'claude';
+      const input = userMessageLine(request.blocks);
+      await this.traceRequest(request, command, args, input);
       const run = this.options.run ?? runCommand;
       const started = Date.now();
-      const out = await run(this.options.command ?? 'claude', args, {
+      const out = await run(command, args, {
         cwd: dir,
-        input: userMessageLine(request.blocks),
+        input,
         env: childEnv(),
         timeoutMs: this.options.timeoutMs ?? 10 * 60_000,
       });
+      await request.trace?.write('response.jsonl', out.stdout);
+      if (out.stderr) await request.trace?.write('stderr.txt', out.stderr);
       return parseResult(out, request, Date.now() - started);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
+  }
+
+  private async traceRequest(
+    request: ModelRequest<unknown>,
+    command: string,
+    args: string[],
+    input: string,
+  ): Promise<void> {
+    if (!request.trace) return;
+    const schema = betaZodOutputFormat(request.schema).schema;
+    await request.trace.write('prompt.md', promptMarkdown(request, schema));
+    // The schema and the stdin line are parsed back, so that the file shows
+    // them as JSON instead of as escaped strings.
+    await request.trace.write('request.json', {
+      command,
+      args,
+      schema,
+      system: request.system,
+      stdin: JSON.parse(input) as unknown,
+    });
   }
 }
 

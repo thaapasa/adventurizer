@@ -35,6 +35,22 @@ installs it.
 The books are saved in `books/`, or in the folder that `BOOKS_DIR` names. The
 server log shows the time, the tokens and the cache use of each call to Claude.
 
+### Tracing
+
+To see what goes to Claude and what comes back, set `TRACE=true` in `.env`. The
+server then writes the files of each call to the `trace` folder of the book,
+named by the time and the action, such as `20261107T144405.464Z-page-2`:
+
+- `prompt.md`: the system prompt, the user message and the output schema, for
+  reading.
+- `request.json`: the exact request. For the API backend, the body sent to the
+  API; for Claude Code, the command line, the system prompt and the stdin line.
+- `response.json` (API) or `response.jsonl` (Claude Code, every stream-json
+  event): the exact response. If the API call fails, `error.json` instead.
+
+The author suggestions are not part of a book, so their traces go to `.trace` in
+the books folder.
+
 ### Checks
 
 - `npm run lint`: ESLint

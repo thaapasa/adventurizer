@@ -69,6 +69,29 @@ describe('ClaudeCodeModelClient', () => {
     expect(options.env.ANTHROPIC_API_KEY).toBeUndefined();
   });
 
+  it('traces the prompt, the request and the raw output', async () => {
+    const files = new Map<string, unknown>();
+    const stdout = resultLine({ structured_output: { answer: 1 } });
+    await client(stdout).generate({
+      ...request,
+      trace: { write: async (name, data) => void files.set(name, data) },
+    });
+
+    expect([...files.keys()]).toEqual([
+      'prompt.md',
+      'request.json',
+      'response.jsonl',
+    ]);
+    expect(files.get('prompt.md')).toContain('System prompt');
+    const sent = files.get('request.json') as {
+      schema: { properties: unknown };
+      stdin: { message: { content: unknown[] } };
+    };
+    expect(sent.schema.properties).toHaveProperty('answer');
+    expect(sent.stdin.message.content).toHaveLength(2);
+    expect(files.get('response.jsonl')).toBe(stdout);
+  });
+
   it('fails when the output does not match the schema', async () => {
     const stdout = resultLine({ structured_output: { answer: 'no' } });
     await expect(client(stdout).generate(request)).rejects.toThrow(ModelError);

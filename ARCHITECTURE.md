@@ -83,6 +83,7 @@ The books are files on disk, one folder per book:
 - `pages/<page-id>.json`: one page, with the ID of the parent page, the choice
   that led to it, the text, the actions, the image prompt and the world changes
 - `images/<page-id>.png`: the image of a page, if there is one
+- `trace/`: the requests and responses of the calls to Claude, if tracing is on
 
 To build the world data for a page, the server follows the parent links back to
 the first page. The server reads all the pages of a book into memory when the
