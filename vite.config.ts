@@ -7,7 +7,8 @@ export default defineConfig({
   server: {
     port: 10610,
     strictPort: true,
-    proxy: { '/api': 'http://localhost:10600' },
+    // With the slash, so that the module /api.ts is not sent to the server.
+    proxy: { '/api/': 'http://localhost:10600' },
   },
   build: { outDir: '../../dist/web', emptyOutDir: true },
 });

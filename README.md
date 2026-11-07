@@ -21,6 +21,17 @@ installs Node and the npm dependencies.
    - `STORY_BACKEND=api` calls the Claude API and needs `ANTHROPIC_API_KEY`.
 2. Run `npm run dev` and open http://localhost:10610.
 
+[dekit](https://dekit.run/), the next version of mprocs, can run the server and
+the web client instead, with the checks ready to start by hand. `mise install`
+installs it.
+
+- `mise start` starts the server and the web client and opens the dekit TUI,
+  where the tasks under `checks/` can be started. The tasks keep running after
+  you close the TUI or the terminal.
+- `mise stop` stops everything.
+- `dekit up` and `dekit attach` do the two steps of `mise start` separately.
+- `dekit start checks/lint` runs one check from the command line.
+
 The books are saved in `books/`, or in the folder that `BOOKS_DIR` names. The
 server log shows the time, the tokens and the cache use of each call to Claude.
 

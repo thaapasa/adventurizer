@@ -1,5 +1,14 @@
 [tools]
 node = "24"
+dekit = "0.10"
 
 [hooks]
 postinstall = "npm install"
+
+[tasks.start]
+description = "Start the server and the web client with dekit and show them"
+run = "dekit up && dekit attach"
+
+[tasks.stop]
+description = "Stop the dekit tasks"
+run = "dekit down"

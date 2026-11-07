@@ -1,0 +1,42 @@
+# Run `dekit up` to start the server and the web client, and `dekit attach`
+# to watch them. The tasks under checks/ start only when you start them, in
+# the TUI or with `dekit start checks/lint`.
+tasks:
+  server:
+    cmd: npm run dev:server
+    ready: { tcp: 10600 }
+    autostart: true
+  web:
+    cmd: npm run dev:web
+    ready: { tcp: 10610 }
+    autostart: true
+
+  checks/:
+  checks/all:
+    type: job
+    cmd:
+      [
+        'bash',
+        '-c',
+        'npm run lint && npm run format:check && npm run typecheck && npm test',
+      ]
+  checks/lint:
+    type: job
+    cmd: npm run lint
+  checks/format-check:
+    type: job
+    cmd: npm run format:check
+  checks/typecheck:
+    type: job
+    cmd: npm run typecheck
+  checks/test:
+    type: job
+    cmd: npm test
+  checks/test-watch:
+    cmd: npx vitest
+  checks/format:
+    type: job
+    cmd: npm run format
+  checks/build:
+    type: job
+    cmd: npm run build
