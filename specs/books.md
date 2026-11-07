@@ -21,6 +21,8 @@ settings, so the app can write different kinds of books.
       cannot be changed after the book is created.
 - [ ] The agent writes the pages and the actions in the language of the book.
 
+- [ ] The user picks an art style for the [images](images.md) of the book.
+
 ## Author style
 
 - [ ] When creating a book, the user can pick an author whose style the agent

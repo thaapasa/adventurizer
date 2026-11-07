@@ -11,6 +11,12 @@ condensed.
 - [ ] A detail in the base, such as the name or the looks of a person, stays the
       same on every path.
 
+## Visual descriptions
+
+- [ ] Each person and place in the world data has a short visual description.
+- [ ] [Image](images.md) prompts use these descriptions, so a person or place
+      looks the same on every page.
+
 ## Branch changes
 
 - [ ] Each path keeps its own record of what has happened, such as a person who

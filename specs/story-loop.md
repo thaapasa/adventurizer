@@ -14,15 +14,16 @@ player reads a page, picks an action, and the agent writes the next page.
 
 ## Context
 
-- [ ] When the agent writes a page, it knows the story so far on the current
-      path.
-- [ ] When the story so far gets too long, the agent condenses the older part
-      into a summary and keeps writing from it.
-- [ ] The agent uses the [world data](world-data.md), so the story stays
-      consistent after it has been condensed.
+- [ ] When the agent writes a page, it gets the [world data](world-data.md) and
+      the full text of the current path.
+- [ ] Each page also gets an [image](images.md) prompt.
+- [ ] If a path gets too long for the context, the agent condenses the older
+      part into a summary and keeps writing from it. The first version does not
+      need this, because a path of dozens of pages fits in the context.
 
 ## Open questions
 
+- Which model writes the pages?
 - Does the book have game rules, such as stats, items and dice, or only story
   choices?
 - Can the player type their own action, or only pick from the list?

@@ -15,6 +15,11 @@ form a tree, which grows as the player explores new choices.
 
 - [ ] The player can go back to an earlier page and pick another action.
 
+## Storage
+
+- [ ] Each book is stored as a folder of files on disk. A developer can read a
+      book in an editor and copy it as one folder.
+
 ## Offline play
 
 - [ ] A book can be played without the Claude API, as far as its pages have been
