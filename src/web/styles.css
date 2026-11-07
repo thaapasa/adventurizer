@@ -1,0 +1,216 @@
+:root {
+  --paper: #f6f0e4;
+  --ink: #2b2118;
+  --muted: #7a6a58;
+  --accent: #7b2d1e;
+  --line: #d9ccb4;
+  --book-font:
+    'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
+    serif;
+  --ui-font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--ui-font);
+}
+
+body {
+  margin: 0;
+}
+
+.screen {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+h1,
+h2 {
+  font-family: var(--book-font);
+  font-weight: normal;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fffaf0;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fffaf0;
+}
+
+input {
+  font: inherit;
+  padding: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fffdf8;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1rem 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: #a01010;
+}
+
+.working {
+  font-style: italic;
+  color: var(--muted);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.book-list,
+.author-list,
+.actions {
+  list-style: none;
+  padding: 0;
+}
+
+.book-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 0.5rem;
+}
+
+.book-title {
+  font-family: var(--book-font);
+  font-size: 1.2rem;
+}
+
+.language-choice {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.language-choice button {
+  font-size: 1.2rem;
+  padding: 1rem 2rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.field label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.chip.selected {
+  border-color: var(--accent);
+  background: #f3dfd5;
+}
+
+.author-list li {
+  margin-bottom: 0.35rem;
+}
+
+.book-heading {
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.page-number {
+  text-align: center;
+  color: var(--muted);
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
+
+.choice {
+  font-family: var(--book-font);
+  font-style: italic;
+  color: var(--muted);
+  text-align: center;
+}
+
+.page-text {
+  font-family: var(--book-font);
+  font-size: 1.2rem;
+  line-height: 1.65;
+  hyphens: auto;
+}
+
+.actions li {
+  margin-bottom: 0.5rem;
+}
+
+.actions button {
+  width: 100%;
+  text-align: left;
+  font-family: var(--book-font);
+  font-size: 1.05rem;
+}
+
+.read-mark {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.dead-end {
+  text-align: center;
+  font-family: var(--book-font);
+  font-size: 1.1rem;
+  margin: 2rem 0;
+}
+
+.back {
+  margin-top: 0.5rem;
+}
+
+.image-prompt {
+  margin-top: 2.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}

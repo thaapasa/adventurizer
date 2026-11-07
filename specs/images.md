@@ -5,10 +5,10 @@ and the image is made with Draw Things, which runs on the user's machine.
 
 ## Prompts
 
-- [ ] The agent writes an image prompt for each page and saves it with the page.
-- [ ] The prompt uses the art style of the [book](books.md), so the images of a
+- [x] The agent writes an image prompt for each page and saves it with the page.
+- [x] The prompt uses the art style of the [book](books.md), so the images of a
       book look alike.
-- [ ] The prompt uses the visual descriptions in the
+- [x] The prompt uses the visual descriptions in the
       [world data](world-data.md), so people and places look the same on every
       page.
 

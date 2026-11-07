@@ -5,24 +5,24 @@ form a tree, which grows as the player explores new choices.
 
 ## Replay
 
-- [ ] Each page of every turn is saved.
-- [ ] The player can restart a book. If they make the same choices, they get the
+- [x] Each page of every turn is saved.
+- [x] The player can restart a book. If they make the same choices, they get the
       same pages.
-- [ ] If the player makes a choice that has no saved page, the agent writes a
+- [x] If the player makes a choice that has no saved page, the agent writes a
       new page and saves it.
 
 ## Going back
 
-- [ ] The player can go back to an earlier page and pick another action.
+- [x] The player can go back to an earlier page and pick another action.
 
 ## Storage
 
-- [ ] Each book is stored as a folder of files on disk. A developer can read a
+- [x] Each book is stored as a folder of files on disk. A developer can read a
       book in an editor and copy it as one folder.
 
 ## Offline play
 
-- [ ] A book can be played without the Claude API, as far as its pages have been
+- [x] A book can be played without the Claude API, as far as its pages have been
       written.
 
 Filling the whole tree in advance is possible but not a goal. The tree grows

@@ -10,6 +10,24 @@ parts fit together.
 - A Vite and React front end shows the books in the browser and calls the server
   through `/api`.
 
+The code is in `src/server`, `src/web` and `src/shared`, which holds the types
+that both use.
+
+## Agent backends
+
+The server talks to Claude through one interface with two versions. The
+developer picks one with `STORY_BACKEND`:
+
+- `claude-code` runs `claude -p` for each page and uses the login of the local
+  Claude Code, so no API key is needed. It runs in an empty temporary folder
+  with no tools, no MCP servers and no settings, so the CLAUDE.md files and
+  hooks of the developer's projects stay out of the story.
+- `api` calls the Claude API with `ANTHROPIC_API_KEY`. If the model declines to
+  write a page, the API reruns the request on a fallback model.
+
+Both ask for structured output with a JSON schema that comes from the Zod
+schemas of the server, and check the answer against the same schemas.
+
 ## Story loop
 
 An agent loop writes the book one page at a time. For each page, the agent gets
@@ -18,9 +36,19 @@ actions the player can choose from. The player picks an action and the loop runs
 again.
 
 The agent gets the full text of the current path, not the whole book. A path
-only grows at the end, so prompt caching covers the earlier pages. If a path
-gets too long for the context, the loop condenses the older part into a summary.
-The first version does not condense.
+only grows at the end, so prompt caching covers the earlier pages:
+
+- The system prompt holds the writing rules, the book settings and the shared
+  base of the world data. It is the same for every page of a book.
+- The user message has one block for each page on the path, with its world
+  changes and actions, and one block for each choice. The blocks of earlier
+  pages are the same on every later request.
+
+When the player reads on, the request for the next page starts with the whole
+previous request, so it reads that part from the cache. A new branch from an
+earlier page gets only the system prompt from the cache. If a path gets too long
+for the context, the loop condenses the older part into a summary. The first
+version does not condense.
 
 ## Book tree
 
@@ -51,14 +79,16 @@ data has two layers:
 The books are files on disk, one folder per book:
 
 - `book.json`: the settings and the shared base of the world data
+- `state.json`: the page where the player left off
 - `pages/<page-id>.json`: one page, with the ID of the parent page, the choice
   that led to it, the text, the actions, the image prompt and the world changes
 - `images/<page-id>.png`: the image of a page, if there is one
 
 To build the world data for a page, the server follows the parent links back to
-the first page. The storage is behind an interface, so it can move to SQLite if
-files get awkward. Embeddings are not needed, because the world data of one book
-fits in the context.
+the first page. The server reads all the pages of a book into memory when the
+book is first used, to find the saved page for a choice. The storage is behind
+an interface, so it can move to SQLite if files get awkward. Embeddings are not
+needed, because the world data of one book fits in the context.
 
 ## Images
 

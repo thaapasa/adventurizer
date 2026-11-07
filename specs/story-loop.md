@@ -5,27 +5,33 @@ player reads a page, picks an action, and the agent writes the next page.
 
 ## Pages
 
-- [ ] Each page has the text of what happens next and a list of actions the
+- [x] Each page has the text of what happens next and a list of actions the
       player can choose from.
-- [ ] The player picks one of the actions, and the book shows the page that
+- [x] The player picks one of the actions, and the book shows the page that
       follows from it.
-- [ ] A page can be a dead end with no actions. The story does not have to
+- [x] A page can be a dead end with no actions. The story does not have to
       continue from every page.
 
 ## Context
 
-- [ ] When the agent writes a page, it gets the [world data](world-data.md) and
+- [x] When the agent writes a page, it gets the [world data](world-data.md) and
       the full text of the current path.
-- [ ] Each page also gets an [image](images.md) prompt.
+- [x] Each page also gets an [image](images.md) prompt.
 - [ ] If a path gets too long for the context, the agent condenses the older
       part into a summary and keeps writing from it. The first version does not
       need this, because a path of dozens of pages fits in the context.
 
-## Open questions
+## Agent
 
-- Which model writes the pages?
-- Does the book have game rules, such as stats, items and dice, or only story
-  choices?
-- Can the player type their own action, or only pick from the list?
-- Is the story written fully as the player goes, or is there a plot outline and
-  endings made at the start?
+- [x] The agent can run on the Claude API with an API key, or on the local
+      Claude Code with its login.
+- [x] The developer can pick the model. The first version uses Claude Opus 5.5.
+
+## Decisions for now
+
+These were decided for the first version and can be revisited:
+
+- The book has only story choices, no game rules such as stats, items or dice.
+- The player picks an action from the list and cannot type their own.
+- The story is written fully as the player goes, without a plot outline or
+  endings made at the start.
