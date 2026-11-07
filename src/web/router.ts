@@ -4,6 +4,7 @@ export type Route =
   | { name: 'books' }
   | { name: 'new' }
   | { name: 'book'; bookId: string }
+  | { name: 'cover'; bookId: string }
   | { name: 'page'; bookId: string; pageId: string };
 
 export function parseRoute(pathname: string): Route {
@@ -13,6 +14,7 @@ export function parseRoute(pathname: string): Route {
     if (parts[2] === 'pages' && parts[3]) {
       return { name: 'page', bookId: parts[1], pageId: parts[3] };
     }
+    if (parts[2] === 'cover') return { name: 'cover', bookId: parts[1] };
     return { name: 'book', bookId: parts[1] };
   }
   return { name: 'books' };
@@ -36,4 +38,8 @@ export function useRoute(): Route {
 
 export function pagePath(bookId: string, pageId: string): string {
   return `/books/${bookId}/pages/${pageId}`;
+}
+
+export function coverPath(bookId: string): string {
+  return `/books/${bookId}/cover`;
 }

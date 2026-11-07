@@ -21,6 +21,7 @@ export const openingOutputSchema = z.object({
     places: z.array(entitySchema),
     details: z.array(z.string()),
   }),
+  coverPrompt: z.string(),
   page: pageOutputSchema,
 });
 export type OpeningOutput = z.infer<typeof openingOutputSchema>;

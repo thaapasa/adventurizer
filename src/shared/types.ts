@@ -30,7 +30,15 @@ export interface Book {
   settings: BookSettings;
   world: World;
   firstPageId: string;
+  /** Missing in books made before covers; the cover then uses page 1. */
+  coverPrompt?: string;
 }
+
+/**
+ * Whether an image exists. `pending` means it is being made or waits in the
+ * queue; `none` means it is not there and is not being made.
+ */
+export type ImageStatus = 'ready' | 'pending' | 'none';
 
 export interface Page {
   id: string;
@@ -53,6 +61,7 @@ export interface BookSummary {
   title: string;
   createdAt: string;
   settings: BookSettings;
+  cover: ImageStatus;
 }
 
 export interface AuthorSuggestion {
@@ -63,6 +72,7 @@ export interface AuthorSuggestion {
 export interface BookResponse {
   book: Book;
   currentPageId: string;
+  cover: ImageStatus;
 }
 
 export interface PageResponse {
@@ -71,6 +81,7 @@ export interface PageResponse {
   depth: number;
   /** For each action, whether the page it leads to has been written. */
   written: boolean[];
+  image: ImageStatus;
 }
 
 export interface CreateBookResponse {

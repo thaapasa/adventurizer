@@ -49,3 +49,8 @@ export const api = {
       { language, genre, style },
     ),
 };
+
+/** `imageId` is a page ID, or `cover` for the cover of the book. */
+export function imageUrl(bookId: string, imageId: string): string {
+  return `/api/books/${bookId}/images/${imageId}`;
+}

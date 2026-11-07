@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { Book, PageResponse } from '../shared/types.js';
-import { api } from './api.js';
+import { api, imageUrl } from './api.js';
 import { appStrings, strings } from './i18n.js';
-import { navigate, pagePath } from './router.js';
+import { coverPath, navigate, pagePath } from './router.js';
+import { usePoll } from './usePoll.js';
 
 export function Reader({
   bookId,
@@ -29,12 +30,18 @@ export function Reader({
       .catch((e: Error) => setError(e.message));
   }, [bookId]);
 
-  // Opening a book continues from the page where the reader left off.
+  // Opening a book continues from the page where the reader left off. A
+  // book that is still on page 1 opens on the cover.
   useEffect(() => {
-    if (!pageId && startPageId) {
-      navigate(pagePath(bookId, startPageId), { replace: true });
+    if (!pageId && book && startPageId) {
+      navigate(
+        startPageId === book.firstPageId
+          ? coverPath(bookId)
+          : pagePath(bookId, startPageId),
+        { replace: true },
+      );
     }
-  }, [bookId, pageId, startPageId]);
+  }, [bookId, pageId, book, startPageId]);
 
   const loadPage = useCallback(() => {
     if (!pageId) return;
@@ -50,6 +57,23 @@ export function Reader({
   }, [bookId, pageId]);
 
   useEffect(loadPage, [loadPage]);
+
+  // Checks whether the image of the page is ready.
+  const pollImage = useCallback(() => {
+    if (!pageId) return;
+    api
+      .getPage(bookId, pageId)
+      .then((res) =>
+        setCurrent((cur) =>
+          cur?.page.id === res.page.id ? { ...cur, image: res.image } : cur,
+        ),
+      )
+      .catch(() => undefined);
+  }, [bookId, pageId]);
+  usePoll(
+    current?.page.id === pageId && current?.image === 'pending',
+    pollImage,
+  );
 
   const choose = async (index: number) => {
     if (!current || writing) return;
@@ -69,15 +93,18 @@ export function Reader({
   // The reader shows the app texts in the language of the book.
   const t = book ? strings[book.settings.language] : appStrings;
   const page = current?.page.id === pageId ? current.page : null;
+  // Page 1 goes back to the cover.
   const goBack = () =>
-    page?.parentId && navigate(pagePath(bookId, page.parentId));
+    navigate(
+      page?.parentId ? pagePath(bookId, page.parentId) : coverPath(bookId),
+    );
 
   return (
     <main className="screen reader" lang={book?.settings.language}>
       <nav className="toolbar">
         <button onClick={() => navigate('/')}>{t.allBooks}</button>
         {book && page && page.id !== book.firstPageId && (
-          <button onClick={() => navigate(pagePath(bookId, book.firstPageId))}>
+          <button onClick={() => navigate(coverPath(bookId))}>
             {t.startOver}
           </button>
         )}
@@ -90,6 +117,17 @@ export function Reader({
             {t.page} {current.depth}
           </p>
           {page.choice && <p className="choice">{page.choice}</p>}
+          {current.image === 'ready' ? (
+            <img
+              className="page-image"
+              src={imageUrl(bookId, page.id)}
+              alt=""
+            />
+          ) : (
+            current.image === 'pending' && (
+              <p className="working image-placeholder">{t.drawingImage}</p>
+            )
+          )}
           <div className="page-text">
             {page.text.split(/\n\s*\n/).map((p, i) => (
               <p key={i}>{p}</p>
@@ -120,9 +158,9 @@ export function Reader({
               )}
             </div>
           )}
-          {!writing && page.parentId && page.actions.length > 0 && (
+          {!writing && page.actions.length > 0 && (
             <button className="back" onClick={goBack}>
-              ← {t.back}
+              ← {page.parentId ? t.back : t.cover}
             </button>
           )}
           <details className="image-prompt">

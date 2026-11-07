@@ -8,7 +8,7 @@ import {
 } from '../shared/types.js';
 import { api } from './api.js';
 import { appStrings, languageNames, strings } from './i18n.js';
-import { navigate, pagePath } from './router.js';
+import { coverPath, navigate } from './router.js';
 
 export function NewBook() {
   const [language, setLanguage] = useState<Language | null>(null);
@@ -81,7 +81,7 @@ function BookForm({
         artStyle,
         author: author.trim() || null,
       });
-      navigate(pagePath(book.id, book.firstPageId), { replace: true });
+      navigate(coverPath(book.id), { replace: true });
     } catch (e) {
       setError((e as Error).message);
       setCreating(false);

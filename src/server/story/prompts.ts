@@ -56,6 +56,10 @@ export function openingSystemPrompt(settings: BookSettings): string {
 
 Before the first page, make up the world of the book: a title, 3 to 6 people, 3 to 6 places, and a few other details, such as the time, the customs or a secret. Give each person and place a short description of who or what they are, and the looks: a visual description of one or two sentences that an image generator can use.
 
+# The cover
+
+Write an image prompt for the cover of the book, in the same way as the image prompts of the pages. Show the main place or the main person of the book in a scene that sets the mood of the story. Do not put the title or any other text on the cover.
+
 ${settingsSection(settings)}`;
 }
 

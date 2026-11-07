@@ -22,6 +22,10 @@ export interface BookStore {
   savePage(bookId: string, page: Page): Promise<void>;
   getState(bookId: string): Promise<BookState | undefined>;
   saveState(bookId: string, state: BookState): Promise<void>;
+  /** `imageId` is a page ID, or `cover` for the cover of the book. */
+  getImage(bookId: string, imageId: string): Promise<Buffer | undefined>;
+  hasImage(bookId: string, imageId: string): Promise<boolean>;
+  saveImage(bookId: string, imageId: string, png: Buffer): Promise<void>;
 }
 
 /** Follows the parent links from a page back to the first page. */

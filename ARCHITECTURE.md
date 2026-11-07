@@ -83,6 +83,7 @@ The books are files on disk, one folder per book:
 - `pages/<page-id>.json`: one page, with the ID of the parent page, the choice
   that led to it, the text, the actions, the image prompt and the world changes
 - `images/<page-id>.png`: the image of a page, if there is one
+- `images/cover.png`: the cover of the book, if there is one
 - `trace/`: the requests and responses of the calls to Claude, if tracing is on
 
 To build the world data for a page, the server follows the parent links back to
@@ -94,6 +95,24 @@ needed, because the world data of one book fits in the context.
 ## Images
 
 The agent writes an image prompt for each page from the art style of the book
-and the visual descriptions in the world data. The user can make the image in
-Draw Things and save it in `images/`. Later the server can call the HTTP API of
-Draw Things directly.
+and the visual descriptions in the world data, and a prompt for the cover when
+it creates the book.
+
+The server makes the images with the HTTP API of Draw Things, which runs on the
+user's machine and copies the `txt2img` call of the Automatic1111 API. The
+server sends only the prompt, the size and a seed, so the user picks the model
+and its settings in Draw Things. `DRAW_THINGS_URL` sets the address of the API.
+
+- An image is queued when the reader first asks for it: the book list asks for
+  the covers, and the reader asks for the cover and the pages. The books made
+  before the images get them the same way.
+- Draw Things makes one image at a time, so the queue runs one job at a time.
+  The latest request goes first, so the page that the reader is on comes before
+  the older requests.
+- If Draw Things is not running, the job fails and the image is tried again the
+  next time it is asked for, after a short wait.
+- The answers tell whether each image is ready, pending or missing. The web
+  client checks again every few seconds while an image is pending.
+
+An image that the user makes in Draw Things by hand and saves in `images/` shows
+in the same way.

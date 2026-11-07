@@ -5,6 +5,8 @@ import { serve } from '@hono/node-server';
 
 import { createApp } from './app.js';
 import { readConfig } from './config.js';
+import { DrawThingsClient } from './images/draw-things.js';
+import { ImageService } from './images/image-service.js';
 import { ApiModelClient } from './model/api-client.js';
 import { ClaudeCodeModelClient } from './model/claude-code-client.js';
 import type { ModelClient } from './model/model-client.js';
@@ -28,12 +30,20 @@ const model: ModelClient =
 const booksDir = path.resolve(config.booksDir);
 const store = new FileBookStore(booksDir);
 const tracer = config.trace ? new FileTracer(booksDir) : undefined;
-const app = createApp(new StoryService(store, model, { tracer }));
+const images = new ImageService(
+  store,
+  config.drawThingsUrl
+    ? new DrawThingsClient(config.drawThingsUrl, config.imageSize)
+    : undefined,
+);
+const app = createApp(new StoryService(store, model, { tracer }), images);
 
 serve({ fetch: app.fetch, port: config.port }, (info) => {
   console.log(
     `Adventurizer API on http://localhost:${info.port}, ` +
       `backend ${config.backend}, model ${config.model}, effort ${config.effort}, ` +
-      `books in ${booksDir}${config.trace ? ', tracing on' : ''}`,
+      `books in ${booksDir}, ` +
+      `images ${config.drawThingsUrl ? `from ${config.drawThingsUrl}` : 'off'}` +
+      `${config.trace ? ', tracing on' : ''}`,
   );
 });

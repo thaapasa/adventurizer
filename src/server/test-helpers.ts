@@ -2,6 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+import type { ImageGenerator } from './images/image-service.js';
 import type { ModelClient, ModelRequest } from './model/model-client.js';
 import { ModelError } from './model/model-client.js';
 import type { OpeningOutput, PageOutput } from './story/schemas.js';
@@ -52,6 +53,19 @@ export function openingOutput(text = 'Page one'): OpeningOutput {
       ],
       details: ['It is winter.'],
     },
+    coverPrompt: 'Cover of the test book',
     page: pageOutput(text),
   };
+}
+
+/** Returns the prompt as the image and records the prompts. */
+export class FakeImageGenerator implements ImageGenerator {
+  readonly prompts: string[] = [];
+  failing = false;
+
+  async generate(prompt: string): Promise<Buffer> {
+    this.prompts.push(prompt);
+    if (this.failing) throw new Error('Draw Things is not running');
+    return Buffer.from(prompt);
+  }
 }

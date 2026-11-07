@@ -11,6 +11,9 @@ export interface Config {
   claudeCommand: string;
   /** Writes the data of every call to Claude in the folder of the book. */
   trace: boolean;
+  /** Null if the server does not make images. */
+  drawThingsUrl: string | null;
+  imageSize: number;
 }
 
 const efforts: Effort[] = ['low', 'medium', 'high', 'xhigh', 'max'];
@@ -34,6 +37,8 @@ export function readConfig(env: NodeJS.ProcessEnv): Config {
     model: env.CLAUDE_MODEL ?? 'claude-opus-5-5',
     effort,
     claudeCommand: env.CLAUDE_COMMAND ?? 'claude',
+    drawThingsUrl: (env.DRAW_THINGS_URL ?? 'http://localhost:7860') || null,
+    imageSize: 1024,
     trace: ['1', 'true', 'yes', 'on'].includes((env.TRACE ?? '').toLowerCase()),
   };
 }

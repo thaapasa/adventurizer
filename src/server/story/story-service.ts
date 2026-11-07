@@ -75,6 +75,7 @@ export class StoryService {
       settings,
       world: out.world,
       firstPageId: page.id,
+      coverPrompt: out.coverPrompt,
     };
     await this.store.savePage(book.id, page);
     await this.store.saveBook(book);
@@ -90,6 +91,12 @@ export class StoryService {
     const book = await this.store.getBook(bookId);
     if (!book) throw new NotFoundError(`Book ${bookId} not found`);
     return book;
+  }
+
+  /** Books made before covers use the image prompt of the first page. */
+  async getCoverPrompt(book: Book): Promise<string> {
+    if (book.coverPrompt) return book.coverPrompt;
+    return (await this.getPage(book.id, book.firstPageId)).imagePrompt;
   }
 
   async getCurrentPageId(book: Book): Promise<string> {

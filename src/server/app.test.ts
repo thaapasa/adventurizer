@@ -7,9 +7,11 @@ import type {
   PageResponse,
 } from '../shared/types.js';
 import { createApp } from './app.js';
+import { ImageService } from './images/image-service.js';
 import { FileBookStore } from './store/file-book-store.js';
 import { StoryService } from './story/story-service.js';
 import {
+  FakeImageGenerator,
   FakeModelClient,
   openingOutput,
   pageOutput,
@@ -26,13 +28,16 @@ const settings = {
 
 describe('API', () => {
   let model: FakeModelClient;
+  let generator: FakeImageGenerator;
+  let images: ImageService;
   let app: ReturnType<typeof createApp>;
 
   beforeEach(async () => {
     model = new FakeModelClient();
-    app = createApp(
-      new StoryService(new FileBookStore(await tempDir()), model),
-    );
+    generator = new FakeImageGenerator();
+    const store = new FileBookStore(await tempDir());
+    images = new ImageService(store, generator);
+    app = createApp(new StoryService(store, model), images);
   });
 
   const json = (method: string, body?: unknown) => ({
@@ -88,6 +93,34 @@ describe('API', () => {
       await app.request(`/api/books/${book.id}`)
     ).json()) as BookResponse;
     expect(opened.currentPageId).toBe(book.firstPageId);
+  });
+
+  it('makes the cover and the page images and serves them', async () => {
+    const book = await createBook();
+    const opened = (await (
+      await app.request(`/api/books/${book.id}`)
+    ).json()) as BookResponse;
+    expect(opened.cover).toBe('pending');
+    await images.whenIdle();
+    expect(generator.prompts).toEqual([
+      'Cover of the test book',
+      'Image of Page one',
+    ]);
+
+    const list = (await (
+      await app.request('/api/books')
+    ).json()) as BookSummary[];
+    expect(list[0]?.cover).toBe('ready');
+    const page = (await (
+      await app.request(`/api/books/${book.id}/pages/${book.firstPageId}`)
+    ).json()) as PageResponse;
+    expect(page.image).toBe('ready');
+
+    const cover = await app.request(`/api/books/${book.id}/images/cover`);
+    expect(cover.headers.get('Content-Type')).toBe('image/png');
+    expect(await cover.text()).toBe('Cover of the test book');
+    const missing = await app.request(`/api/books/${book.id}/images/nope`);
+    expect(missing.status).toBe(404);
   });
 
   it('rejects bad input', async () => {

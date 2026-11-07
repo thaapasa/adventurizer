@@ -1,5 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises';
+import {
+  access,
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  writeFile,
+} from 'node:fs/promises';
 import path from 'node:path';
 
 import type { Book, Page } from '../../shared/types.js';
@@ -18,8 +25,8 @@ function checkId(id: string): string {
 }
 
 /**
- * Stores each book as a folder: `book.json`, `state.json` and one file per
- * page in `pages/`. The pages of a book are read into memory the first time
+ * Stores each book as a folder: `book.json`, `state.json`, one file per page
+ * in `pages/` and the images in `images/`. The pages of a book are read into memory the first time
  * the book is used, so that finding the children of a page needs no file scan.
  */
 export class FileBookStore implements BookStore {
@@ -82,6 +89,33 @@ export class FileBookStore implements BookStore {
     await writeJson(path.join(this.bookDir(bookId), 'state.json'), state);
   }
 
+  async getImage(bookId: string, imageId: string): Promise<Buffer | undefined> {
+    try {
+      return await readFile(this.imageFile(bookId, imageId));
+    } catch (e) {
+      if (isNotFound(e)) return undefined;
+      throw e;
+    }
+  }
+
+  async hasImage(bookId: string, imageId: string): Promise<boolean> {
+    try {
+      await access(this.imageFile(bookId, imageId));
+      return true;
+    } catch (e) {
+      if (isNotFound(e)) return false;
+      throw e;
+    }
+  }
+
+  async saveImage(bookId: string, imageId: string, png: Buffer): Promise<void> {
+    await writeAtomic(this.imageFile(bookId, imageId), png);
+  }
+
+  private imageFile(bookId: string, imageId: string): string {
+    return path.join(this.bookDir(bookId), 'images', `${checkId(imageId)}.png`);
+  }
+
   private bookDir(bookId: string): string {
     return path.join(this.rootDir, checkId(bookId));
   }
@@ -116,11 +150,15 @@ async function readJson<T>(file: string): Promise<T | undefined> {
   }
 }
 
-/** Writes through a temporary file, so a crash never leaves half a file. */
 async function writeJson(file: string, data: unknown): Promise<void> {
+  await writeAtomic(file, JSON.stringify(data, null, 2) + '\n');
+}
+
+/** Writes through a temporary file, so a crash never leaves half a file. */
+async function writeAtomic(file: string, data: string | Buffer): Promise<void> {
   await mkdir(path.dirname(file), { recursive: true });
   const tmp = `${file}.${randomUUID()}.tmp`;
-  await writeFile(tmp, JSON.stringify(data, null, 2) + '\n', 'utf8');
+  await writeFile(tmp, data);
   await rename(tmp, file);
 }
 

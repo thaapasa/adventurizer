@@ -1,4 +1,5 @@
 import { BookList } from './BookList.js';
+import { Cover } from './Cover.js';
 import { NewBook } from './NewBook.js';
 import { Reader } from './Reader.js';
 import { useRoute } from './router.js';
@@ -10,6 +11,8 @@ export function App() {
       return <BookList />;
     case 'new':
       return <NewBook />;
+    case 'cover':
+      return <Cover key={route.bookId} bookId={route.bookId} />;
     case 'book':
     case 'page':
       return (
