@@ -20,6 +20,9 @@ After editing a spec, format it with Prettier: `npm run format`.
 
 ## Areas
 
+- [Books](books.md): the list of books and the settings of each book, such as
+  genre, style, language and author style.
+- [Localization](localization.md): the app texts in English and Finnish.
 - [Story loop](story-loop.md): how the book writes the next page and the
   choices.
 - [Book tree](book-tree.md): saving pages, replaying a path and going back.
