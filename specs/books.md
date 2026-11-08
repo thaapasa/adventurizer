@@ -34,3 +34,29 @@ settings, so the app can write different kinds of books.
       book.
 - [x] The user can type in any author, or a mix such as "Joe Abercrombie meets
       Terry Pratchett". The suggestions are only examples.
+
+## Tone
+
+The tone settings tell the agent how the book should feel, so it does not have
+to guess from the genre and the style alone.
+
+- [ ] The user sets how realistic the world is, such as grounded, a little odd
+      or absurd.
+- [ ] The user sets the target reader, such as children, young adults or adults.
+- [ ] The user sets how dark the story can get, such as light, some danger or
+      grim.
+- [ ] The agent suggests values for each tone setting that fit the language,
+      genre and style of the book. The user can type in anything instead.
+
+## Length
+
+- [ ] The user picks the length of the book: short, medium or long. The length
+      is the number of pages on a path before the story reaches an ending:
+  - short: about 10 to 15 pages
+  - medium: about 20 to 30 pages
+  - long: about 40 to 60 pages
+
+## Idea, blurb and title
+
+Before the book is created, the user and the agent agree on what the book is
+about. See [book setup](book-setup.md) for the steps.

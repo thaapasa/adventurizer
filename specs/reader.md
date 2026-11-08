@@ -7,6 +7,7 @@ The app runs in the browser. The user reads a book there and picks the actions.
 - [x] If a page has an [image](images.md), it shows with the text.
 - [x] The book has a cover page before page 1. It shows the title, the cover
       image, the genre, the style and the author style.
+- [ ] The cover page shows the blurb of the book.
 - [x] The cover page has a button to start reading from page 1, and a button to
       continue from where the reader left off, if that is past page 1.
 - [x] If the user opens a book that is still on page 1, the book opens on the

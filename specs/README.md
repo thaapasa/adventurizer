@@ -22,6 +22,8 @@ After editing a spec, format it with Prettier: `npm run format`.
 
 - [Books](books.md): the list of books and the settings of each book, such as
   genre, style, language and author style.
+- [Book setup](book-setup.md): the steps for creating a book, from the idea to
+  the blurb and the hidden story plan.
 - [Localization](localization.md): the app texts in English and Finnish.
 - [Reader](reader.md): the browser view for reading a book and picking actions.
 - [Images](images.md): an image for each page, made with Draw Things.
