@@ -11,12 +11,12 @@ player reads a page, picks an action, and the agent writes the next page.
       follows from it.
 - [x] A page can be a dead end with no actions. The story does not have to
       continue from every page.
-- [ ] Each page moves the story forward: something changes, is learned or is
+- [x] Each page moves the story forward: something changes, is learned or is
       decided. A page does not just repeat the action the player picked in a
       slightly different form.
-- [ ] A page has 3 to 5 actions. They lead to clearly different directions, so
+- [x] A page has 3 to 5 actions. They lead to clearly different directions, so
       each choice matters.
-- [ ] The actions are varied in kind, such as talking, fighting, sneaking,
+- [x] The actions are varied in kind, such as talking, fighting, sneaking,
       investigating or leaving, and are not all safe or all reckless.
 
 ## Story plan
@@ -25,21 +25,21 @@ When the agent creates a book, it writes a plan that keeps the story focused on
 what the blurb promises. The plan is hidden from the player. It lists goals
 rather than a fixed order of events, so it works with any path through the book.
 
-- [ ] The plan has the truth behind the blurb: the secrets, what the antagonist
+- [x] The plan has the truth behind the blurb: the secrets, what the antagonist
       wants and what is really going on.
-- [ ] The plan has 3 to 5 milestones that a path can reach in any order, such as
+- [x] The plan has 3 to 5 milestones that a path can reach in any order, such as
       "the reader finds out who stole the crown".
-- [ ] The plan has a few kinds of endings: good ones, failures and possibly a
+- [x] The plan has a few kinds of endings: good ones, failures and possibly a
       strange one.
-- [ ] The plan has tone rules that follow from the
+- [x] The plan has tone rules that follow from the
       [tone settings](books.md#tone), such as "the world is grounded and the
       humor comes from the people".
-- [ ] When the agent writes a page, it gets the blurb and the plan.
-- [ ] Each path keeps a record of the milestones it has reached.
-- [ ] The agent paces the story by the [length](books.md#length) of the book and
+- [x] When the agent writes a page, it gets the blurb and the plan.
+- [x] Each path keeps a record of the milestones it has reached.
+- [x] The agent paces the story by the [length](books.md#length) of the book and
       the milestones reached, and steers the path towards an ending when it gets
       near the length.
-- [ ] The plan is saved in the files of the book, where a developer can read it.
+- [x] The plan is saved in the files of the book, where a developer can read it.
 
 ## Context
 

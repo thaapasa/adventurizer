@@ -40,17 +40,17 @@ settings, so the app can write different kinds of books.
 The tone settings tell the agent how the book should feel, so it does not have
 to guess from the genre and the style alone.
 
-- [ ] The user sets how realistic the world is, such as grounded, a little odd
+- [x] The user sets how realistic the world is, such as grounded, a little odd
       or absurd.
-- [ ] The user sets the target reader, such as children, young adults or adults.
-- [ ] The user sets how dark the story can get, such as light, some danger or
+- [x] The user sets the target reader, such as children, young adults or adults.
+- [x] The user sets how dark the story can get, such as light, some danger or
       grim.
-- [ ] The agent suggests values for each tone setting that fit the language,
+- [x] The agent suggests values for each tone setting that fit the language,
       genre and style of the book. The user can type in anything instead.
 
 ## Length
 
-- [ ] The user picks the length of the book: short, medium or long. The length
+- [x] The user picks the length of the book: short, medium or long. The length
       is the number of pages on a path before the story reaches an ending:
   - short: about 10 to 15 pages
   - medium: about 20 to 30 pages

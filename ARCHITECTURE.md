@@ -28,6 +28,33 @@ developer picks one with `STORY_BACKEND`:
 Both ask for structured output with a JSON schema that comes from the Zod
 schemas of the server, and check the answer against the same schemas.
 
+## Book setup
+
+Before a book exists, the user and the agent agree on its title and blurb. The
+server keeps no state between these calls: each call to `/api/pitch` sends the
+settings, the idea and, for a new version, the current title and blurb with the
+user's edits and comments. The web client holds the draft until the user accepts
+it.
+
+When the user accepts, one call to Claude writes the story plan, the world data,
+the cover prompt and page 1. The plan comes first in the output schema, so the
+agent decides where the story goes before it writes the world and the first
+page.
+
+## Story plan
+
+The plan is hidden from the player and lives in `book.json`. It has the truth
+behind the blurb, numbered milestones, the kinds of endings and tone rules. It
+lists goals instead of an order of events, because the paths branch and a fixed
+order would fight the choices.
+
+Each page lists the numbers of the milestones it reached. The choice block of
+the user message says which milestones the path has reached so far. The list
+depends only on the earlier pages of the path, so the block stays the same on
+later requests and the prompt cache still works. The system prompt gives the
+target length of a path, and the agent paces the story by the page number and
+the milestones.
+
 ## Story loop
 
 An agent loop writes the book one page at a time. For each page, the agent gets
@@ -38,8 +65,9 @@ again.
 The agent gets the full text of the current path, not the whole book. A path
 only grows at the end, so prompt caching covers the earlier pages:
 
-- The system prompt holds the writing rules, the book settings and the shared
-  base of the world data. It is the same for every page of a book.
+- The system prompt holds the writing rules, the book settings, the blurb, the
+  plan and the shared base of the world data. It is the same for every page of a
+  book.
 - The user message has one block for each page on the path, with its world
   changes and actions, and one block for each choice. The blocks of earlier
   pages are the same on every later request.
@@ -78,10 +106,12 @@ data has two layers:
 
 The books are files on disk, one folder per book:
 
-- `book.json`: the settings and the shared base of the world data
+- `book.json`: the settings, the idea, the blurb, the story plan and the shared
+  base of the world data
 - `state.json`: the page where the player left off
 - `pages/<page-id>.json`: one page, with the ID of the parent page, the choice
-  that led to it, the text, the actions, the image prompt and the world changes
+  that led to it, the text, the actions, the image prompt, the world changes and
+  the milestones reached
 - `images/<page-id>.png`: the image of a page, if there is one
 - `images/cover.png`: the cover of the book, if there is one
 - `trace/`: the requests and responses of the calls to Claude, if tracing is on

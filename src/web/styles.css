@@ -54,7 +54,8 @@ button.primary {
   color: #fffaf0;
 }
 
-input {
+input,
+textarea {
   font: inherit;
   padding: 0.5rem;
   border: 1px solid var(--line);
@@ -149,6 +150,22 @@ input {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.blurb-input,
+.blurb {
+  font-family: var(--book-font);
+  line-height: 1.6;
+}
+
+.blurb {
+  white-space: pre-line;
+  margin: 1.5rem 0;
 }
 
 .chips {

@@ -3,6 +3,8 @@ import { z } from 'zod';
 
 import {
   type Book,
+  bookLengths,
+  type BookPitch,
   type BookResponse,
   type BookSummary,
   type CreateBookResponse,
@@ -10,6 +12,7 @@ import {
   languages,
   type Page,
   type PageResponse,
+  type ToneSuggestions,
 } from '../shared/types.js';
 import type { ImageService } from './images/image-service.js';
 import { ModelError } from './model/model-client.js';
@@ -18,19 +21,53 @@ import { NotFoundError, type StoryService } from './story/story-service.js';
 
 const text = z.string().trim().min(1).max(200);
 
-const createBookSchema = z.object({
+const optionalText = z.string().trim().max(200);
+
+const settingsSchema = z.object({
   language: z.enum(languages),
   genre: text,
   style: text,
+  realism: optionalText,
+  audience: optionalText,
+  darkness: optionalText,
   artStyle: text,
-  author: z.string().trim().max(200).nullable().optional(),
+  author: optionalText
+    .nullable()
+    .optional()
+    .transform((a) => a || null),
+  length: z.enum(bookLengths),
+});
+
+/** Empty text counts as no idea, which lets the agent come up with one. */
+const ideaSchema = z
+  .string()
+  .trim()
+  .max(4000)
+  .nullable()
+  .transform((i) => i || null);
+
+const pitchSchema = z.object({
+  title: text,
+  blurb: z.string().trim().min(1).max(4000),
+});
+
+const pitchRequestSchema = z.object({
+  settings: settingsSchema,
+  idea: ideaSchema,
+  current: pitchSchema.optional(),
+  comments: z.string().trim().max(4000).optional(),
+});
+
+const createBookSchema = pitchSchema.extend({
+  settings: settingsSchema,
+  idea: ideaSchema,
 });
 
 const chooseSchema = z.object({ choiceIndex: z.number().int().min(0) });
 
 const positionSchema = z.object({ pageId: z.string() });
 
-const authorsSchema = z.object({
+const genreSchema = z.object({
   language: z.enum(languages),
   genre: text,
   style: text,
@@ -90,11 +127,9 @@ export function createApp(story: StoryService, images: ImageService): Hono {
   });
 
   app.post('/api/books', async (c) => {
-    const body = createBookSchema.parse(await c.req.json());
-    const book = await story.createBook({
-      ...body,
-      author: body.author || null,
-    });
+    const book = await story.createBook(
+      createBookSchema.parse(await c.req.json()),
+    );
     return c.json({ book } satisfies CreateBookResponse, 201);
   });
 
@@ -149,8 +184,21 @@ export function createApp(story: StoryService, images: ImageService): Hono {
     return c.json({ page, ...info, image } satisfies PageResponse);
   });
 
+  app.post('/api/pitch', async (c) => {
+    const pitch = await story.writePitch(
+      pitchRequestSchema.parse(await c.req.json()),
+    );
+    return c.json(pitch satisfies BookPitch);
+  });
+
+  app.post('/api/suggestions/tone', async (c) => {
+    const body = genreSchema.parse(await c.req.json());
+    const tone = await story.suggestTone(body.language, body.genre, body.style);
+    return c.json(tone satisfies ToneSuggestions);
+  });
+
   app.post('/api/suggestions/authors', async (c) => {
-    const body = authorsSchema.parse(await c.req.json());
+    const body = genreSchema.parse(await c.req.json());
     const authors = await story.suggestAuthors(
       body.language,
       body.genre,

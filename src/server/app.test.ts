@@ -22,8 +22,19 @@ const settings = {
   language: 'en',
   genre: 'Fantasy',
   style: 'Grimdark',
+  realism: 'Grounded',
+  audience: '',
+  darkness: 'Grim',
   artStyle: 'Ink drawing',
   author: '',
+  length: 'medium',
+};
+
+const createBody = {
+  settings,
+  idea: '',
+  title: 'The Rope',
+  blurb: 'You hang by a thread.',
 };
 
 describe('API', () => {
@@ -48,7 +59,7 @@ describe('API', () => {
 
   async function createBook() {
     model.queue(openingOutput());
-    const res = await app.request('/api/books', json('POST', settings));
+    const res = await app.request('/api/books', json('POST', createBody));
     expect(res.status).toBe(201);
     return ((await res.json()) as CreateBookResponse).book;
   }
@@ -56,6 +67,8 @@ describe('API', () => {
   it('creates, lists and opens a book', async () => {
     const book = await createBook();
     expect(book.settings.author).toBeNull();
+    expect(book.idea).toBeNull();
+    expect(book.blurb).toBe('You hang by a thread.');
 
     const list = (await (
       await app.request('/api/books')
@@ -126,12 +139,15 @@ describe('API', () => {
   it('rejects bad input', async () => {
     const missing = await app.request(
       '/api/books',
-      json('POST', { ...settings, genre: '' }),
+      json('POST', { ...createBody, settings: { ...settings, genre: '' } }),
     );
     expect(missing.status).toBe(400);
     const badLanguage = await app.request(
       '/api/books',
-      json('POST', { ...settings, language: 'sv' }),
+      json('POST', {
+        ...createBody,
+        settings: { ...settings, language: 'sv' },
+      }),
     );
     expect(badLanguage.status).toBe(400);
     const traversal = await app.request(
@@ -139,6 +155,21 @@ describe('API', () => {
       json('PUT', { pageId: '../../etc' }),
     );
     expect(traversal.status).toBe(400);
+  });
+
+  it('writes a blurb', async () => {
+    model.queue({ title: 'The Rope', blurb: 'You hang.' });
+    const res = await app.request(
+      '/api/pitch',
+      json('POST', { settings, idea: null, comments: 'Darker' }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ title: 'The Rope', blurb: 'You hang.' });
+    const empty = await app.request(
+      '/api/pitch',
+      json('POST', { settings, idea: null, current: { title: '', blurb: '' } }),
+    );
+    expect(empty.status).toBe(400);
   });
 
   it('answers 404 for a missing book or page', async () => {
@@ -150,7 +181,7 @@ describe('API', () => {
   });
 
   it('answers 502 when the model fails', async () => {
-    const res = await app.request('/api/books', json('POST', settings));
+    const res = await app.request('/api/books', json('POST', createBody));
     expect(res.status).toBe(502);
   });
 });

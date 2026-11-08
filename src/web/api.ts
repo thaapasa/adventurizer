@@ -1,12 +1,15 @@
 import type {
   AuthorSuggestion,
+  BookPitch,
   BookResponse,
-  BookSettings,
   BookSummary,
+  CreateBookRequest,
   CreateBookResponse,
   ErrorResponse,
   Language,
   PageResponse,
+  PitchRequest,
+  ToneSuggestions,
 } from '../shared/types.js';
 
 async function request<T>(
@@ -28,8 +31,10 @@ async function request<T>(
 
 export const api = {
   listBooks: () => request<BookSummary[]>('GET', '/api/books'),
-  createBook: (settings: BookSettings) =>
-    request<CreateBookResponse>('POST', '/api/books', settings),
+  writePitch: (req: PitchRequest) =>
+    request<BookPitch>('POST', '/api/pitch', req),
+  createBook: (req: CreateBookRequest) =>
+    request<CreateBookResponse>('POST', '/api/books', req),
   getBook: (bookId: string) =>
     request<BookResponse>('GET', `/api/books/${bookId}`),
   getPage: (bookId: string, pageId: string) =>
@@ -48,6 +53,12 @@ export const api = {
       '/api/suggestions/authors',
       { language, genre, style },
     ),
+  suggestTone: (language: Language, genre: string, style: string) =>
+    request<ToneSuggestions>('POST', '/api/suggestions/tone', {
+      language,
+      genre,
+      style,
+    }),
 };
 
 /** `imageId` is a page ID, or `cover` for the cover of the book. */

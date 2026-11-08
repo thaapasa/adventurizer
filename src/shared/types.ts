@@ -1,12 +1,51 @@
 export const languages = ['en', 'fi'] as const;
 export type Language = (typeof languages)[number];
 
-export interface BookSettings {
+export const bookLengths = ['short', 'medium', 'long'] as const;
+export type BookLength = (typeof bookLengths)[number];
+
+/** The number of pages on a path before it reaches an ending. */
+export const lengthPages: Record<BookLength, [number, number]> = {
+  short: [10, 15],
+  medium: [20, 30],
+  long: [40, 60],
+};
+
+export interface Tone {
+  /** How realistic the world is, such as grounded or absurd. */
+  realism: string;
+  /** The target reader, such as children or adults. */
+  audience: string;
+  /** How dark the story can get. */
+  darkness: string;
+}
+
+export interface BookSettings extends Tone {
   language: Language;
   genre: string;
   style: string;
   artStyle: string;
   author: string | null;
+  length: BookLength;
+}
+
+/** What the user and the agent agree on before the book is created. */
+export interface BookPitch {
+  title: string;
+  blurb: string;
+}
+
+/**
+ * The hidden plan that keeps the story focused. It lists goals rather than
+ * an order of events, so that it works with any path through the book.
+ */
+export interface StoryPlan {
+  /** The secrets and what is really going on behind the blurb. */
+  truth: string;
+  /** Milestones that a path can reach in any order. Pages refer to them by number. */
+  milestones: string[];
+  endings: string[];
+  toneRules: string[];
 }
 
 export interface WorldEntity {
@@ -28,6 +67,10 @@ export interface Book {
   title: string;
   createdAt: string;
   settings: BookSettings;
+  /** The idea that the user wrote, or null if the agent came up with it. */
+  idea: string | null;
+  blurb: string;
+  plan: StoryPlan;
   world: World;
   firstPageId: string;
   /** Missing in books made before covers; the cover then uses page 1. */
@@ -53,6 +96,8 @@ export interface Page {
   imagePrompt: string;
   /** What changed in the world on this page. Seen only on paths through it. */
   worldChanges: string[];
+  /** The numbers of the plan milestones that the path reached on this page. */
+  milestones: number[];
   createdAt: string;
 }
 
@@ -67,6 +112,26 @@ export interface BookSummary {
 export interface AuthorSuggestion {
   name: string;
   note: string;
+}
+
+export interface ToneSuggestions {
+  realism: string[];
+  audience: string[];
+  darkness: string[];
+}
+
+export interface PitchRequest {
+  settings: BookSettings;
+  /** Null lets the agent come up with the idea. */
+  idea: string | null;
+  /** The current version with the user's edits, when asking for a new one. */
+  current?: BookPitch;
+  comments?: string;
+}
+
+export interface CreateBookRequest extends BookPitch {
+  settings: BookSettings;
+  idea: string | null;
 }
 
 export interface BookResponse {

@@ -3,26 +3,34 @@ import { randomUUID } from 'node:crypto';
 import type {
   AuthorSuggestion,
   Book,
-  BookSettings,
+  BookPitch,
+  CreateBookRequest,
   Language,
   Page,
+  PitchRequest,
+  ToneSuggestions,
 } from '../../shared/types.js';
 import type { ModelClient } from '../model/model-client.js';
 import type { Tracer } from '../model/trace.js';
 import { type BookStore, getPath } from '../store/book-store.js';
 import {
-  authorsBlocks,
   authorsSystemPrompt,
   bookSystemPrompt,
+  genreBlocks,
   openingBlocks,
   openingSystemPrompt,
   pathBlocks,
+  pitchBlocks,
+  pitchSystemPrompt,
+  toneSystemPrompt,
 } from './prompts.js';
 import {
   authorsOutputSchema,
   openingOutputSchema,
   type PageOutput,
   pageOutputSchema,
+  pitchOutputSchema,
+  toneOutputSchema,
 } from './schemas.js';
 
 export interface StoryServiceOptions {
@@ -43,6 +51,7 @@ export class StoryService {
   /** Page writes in progress, so that a double click writes one page. */
   private readonly inFlight = new Map<string, Promise<ChooseResult>>();
   private readonly authorCache = new Map<string, AuthorSuggestion[]>();
+  private readonly toneCache = new Map<string, ToneSuggestions>();
 
   private readonly newId: () => string;
   private readonly tracer: Tracer | undefined;
@@ -56,13 +65,25 @@ export class StoryService {
     this.tracer = options.tracer;
   }
 
-  async createBook(settings: BookSettings): Promise<Book> {
+  /** Writes the title and the blurb, or a new version of them. */
+  async writePitch(request: PitchRequest): Promise<BookPitch> {
+    return this.model.generate({
+      purpose: 'blurb',
+      system: pitchSystemPrompt(request.settings),
+      blocks: pitchBlocks(request.idea, request.current, request.comments),
+      schema: pitchOutputSchema,
+      trace: this.tracer?.start(null, 'blurb'),
+    });
+  }
+
+  async createBook(request: CreateBookRequest): Promise<Book> {
+    const { settings, idea, title, blurb } = request;
     // The ID is made first, so that the trace of the opening is in the
     // folder of the book, also when the opening fails.
     const bookId = this.newId();
     const out = await this.model.generate({
       purpose: 'opening',
-      system: openingSystemPrompt(settings),
+      system: openingSystemPrompt(settings, { title, blurb }),
       blocks: openingBlocks(),
       schema: openingOutputSchema,
       trace: this.tracer?.start(bookId, 'opening'),
@@ -70,9 +91,12 @@ export class StoryService {
     const page = this.makePage(out.page, null, null, null);
     const book: Book = {
       id: bookId,
-      title: out.title,
+      title,
       createdAt: new Date().toISOString(),
       settings,
+      idea,
+      blurb,
+      plan: out.plan,
       world: out.world,
       firstPageId: page.id,
       coverPrompt: out.coverPrompt,
@@ -200,13 +224,33 @@ export class StoryService {
     const out = await this.model.generate({
       purpose: 'author suggestions',
       system: authorsSystemPrompt(),
-      blocks: authorsBlocks(language, genre, style),
+      blocks: genreBlocks(language, genre, style),
       schema: authorsOutputSchema,
       effort: 'low',
       trace: this.tracer?.start(null, 'authors'),
     });
     this.authorCache.set(key, out.authors);
     return out.authors;
+  }
+
+  async suggestTone(
+    language: Language,
+    genre: string,
+    style: string,
+  ): Promise<ToneSuggestions> {
+    const key = JSON.stringify([language, genre, style]);
+    const cached = this.toneCache.get(key);
+    if (cached) return cached;
+    const out = await this.model.generate({
+      purpose: 'tone suggestions',
+      system: toneSystemPrompt(),
+      blocks: genreBlocks(language, genre, style),
+      schema: toneOutputSchema,
+      effort: 'low',
+      trace: this.tracer?.start(null, 'tone'),
+    });
+    this.toneCache.set(key, out);
+    return out;
   }
 
   private makePage(
@@ -224,6 +268,7 @@ export class StoryService {
       actions: out.actions,
       imagePrompt: out.imagePrompt,
       worldChanges: out.worldChanges,
+      milestones: out.milestones,
       createdAt: new Date().toISOString(),
     };
   }

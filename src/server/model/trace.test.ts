@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { FileBookStore } from '../store/file-book-store.js';
 import { StoryService } from '../story/story-service.js';
 import {
+  createRequest,
   FakeModelClient,
   openingOutput,
   pageOutput,
@@ -41,13 +42,7 @@ describe('FileTracer', () => {
     const story = new StoryService(new FileBookStore(dir), model, {
       tracer: new FileTracer(dir),
     });
-    const book = await story.createBook({
-      language: 'en',
-      genre: 'Fantasy',
-      style: 'Epic',
-      artStyle: 'Ink',
-      author: null,
-    });
+    const book = await story.createBook(createRequest());
     await story.choose(book.id, book.firstPageId, 0);
     await story.suggestAuthors('en', 'Fantasy', 'Epic');
 

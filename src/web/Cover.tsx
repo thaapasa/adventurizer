@@ -46,6 +46,7 @@ export function Cover({ bookId }: { bookId: string }) {
               <p className="working image-placeholder">{t.drawingImage}</p>
             )
           )}
+          <p className="blurb">{book.blurb}</p>
           <p className="cover-details muted">
             {book.settings.genre} · {book.settings.style}
             {book.settings.author && (

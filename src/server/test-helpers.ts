@@ -2,6 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+import type { BookSettings, CreateBookRequest } from '../shared/types.js';
 import type { ImageGenerator } from './images/image-service.js';
 import type { ModelClient, ModelRequest } from './model/model-client.js';
 import { ModelError } from './model/model-client.js';
@@ -28,6 +29,29 @@ export class FakeModelClient implements ModelClient {
   }
 }
 
+export const testSettings: BookSettings = {
+  language: 'fi',
+  genre: 'Fantasia',
+  style: 'Synkkä',
+  realism: 'Maanläheinen',
+  audience: 'Aikuiset',
+  darkness: 'Synkkä',
+  artStyle: 'Tussipiirros',
+  author: 'Tove Jansson',
+  length: 'short',
+};
+
+export function createRequest(
+  settings: Partial<BookSettings> = {},
+): CreateBookRequest {
+  return {
+    settings: { ...testSettings, ...settings },
+    idea: 'A stolen bell',
+    title: 'The Test Book',
+    blurb: 'Someone has stolen the bell of Varrow.',
+  };
+}
+
 export function pageOutput(
   text: string,
   overrides: Partial<PageOutput> = {},
@@ -37,13 +61,19 @@ export function pageOutput(
     actions: ['Go left', 'Go right'],
     imagePrompt: `Image of ${text}`,
     worldChanges: [],
+    milestones: [],
     ...overrides,
   };
 }
 
 export function openingOutput(text = 'Page one'): OpeningOutput {
   return {
-    title: 'The Test Book',
+    plan: {
+      truth: 'The mayor stole the bell.',
+      milestones: ['The reader finds the bell', 'The reader exposes the mayor'],
+      endings: ['The bell rings again', 'The reader is run out of town'],
+      toneRules: ['Grounded, with dry humor'],
+    },
     world: {
       people: [
         { name: 'Mara', description: 'A smuggler.', looks: 'Red coat.' },

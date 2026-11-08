@@ -8,37 +8,37 @@ writes a hidden plan for the story and the first page.
 
 ## Steps
 
-- [ ] The user creates a book in these steps:
+- [x] The user creates a book in these steps:
   1. Pick the language.
   2. Pick the genre, the style, the author style, the art style, the
      [tone](books.md#tone) and the [length](books.md#length).
   3. Write the idea of the book.
   4. Iterate on the title and the blurb with the agent.
   5. Accept the title and the blurb. The agent creates the book.
-- [ ] The user can go back to an earlier step and change it before the book is
+- [x] The user can go back to an earlier step and change it before the book is
       created.
 
 ## Idea
 
-- [ ] The user writes the idea of the book as free text. It can be one line or
+- [x] The user writes the idea of the book as free text. It can be one line or
       several paragraphs.
-- [ ] A "surprise me" button lets the agent come up with the idea.
+- [x] A "surprise me" button lets the agent come up with the idea.
 
 ## Title and blurb
 
-- [ ] From the settings and the idea, the agent writes a title and a blurb for
+- [x] From the settings and the idea, the agent writes a title and a blurb for
       the book. The blurb is about 80 to 150 words, in the language of the book.
-- [ ] The user can edit the title and the blurb directly.
-- [ ] The user can write comments on the blurb, such as "less silly, and the
+- [x] The user can edit the title and the blurb directly.
+- [x] The user can write comments on the blurb, such as "less silly, and the
       dragon should be the villain", and ask for a new version.
-- [ ] When the user asks for a new version, the agent gets the current title and
+- [x] When the user asks for a new version, the agent gets the current title and
       blurb, with the user's edits, and the comments.
-- [ ] The user can iterate as many times as they want.
+- [x] The user can iterate as many times as they want.
 
 ## Creating the book
 
-- [ ] When the user accepts the title and the blurb, the agent writes the
+- [x] When the user accepts the title and the blurb, the agent writes the
       [world data](world-data.md), the [story plan](story-loop.md#story-plan),
       the cover prompt and the first page from them.
-- [ ] The title and the blurb are saved with the book and cannot be changed
+- [x] The title and the blurb are saved with the book and cannot be changed
       after it is created.
