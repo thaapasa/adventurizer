@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { Book, PageResponse } from '../shared/types.js';
-import { api, imageUrl } from './api.js';
+import { api } from './api.js';
 import { appStrings, strings } from './i18n.js';
+import { PageImage } from './PageImage.js';
 import { coverPath, navigate, pagePath } from './router.js';
 import { usePoll } from './usePoll.js';
 
@@ -117,17 +118,18 @@ export function Reader({
             {t.page} {current.depth}
           </p>
           {page.choice && <p className="choice">{page.choice}</p>}
-          {current.image === 'ready' ? (
-            <img
-              className="page-image"
-              src={imageUrl(bookId, page.id)}
-              alt=""
-            />
-          ) : (
-            current.image === 'pending' && (
-              <p className="working image-placeholder">{t.drawingImage}</p>
-            )
-          )}
+          <PageImage
+            bookId={bookId}
+            imageId={page.id}
+            status={current.image}
+            onStatus={(image) =>
+              setCurrent((cur) =>
+                cur?.page.id === page.id ? { ...cur, image } : cur,
+              )
+            }
+            onError={setError}
+            texts={t}
+          />
           <div className="page-text">
             {page.text.split(/\n\s*\n/).map((p, i) => (
               <p key={i}>{p}</p>

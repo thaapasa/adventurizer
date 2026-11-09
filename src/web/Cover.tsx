@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { BookResponse } from '../shared/types.js';
-import { api, imageUrl } from './api.js';
+import { api } from './api.js';
 import { appStrings, strings } from './i18n.js';
+import { PageImage } from './PageImage.js';
 import { navigate, pagePath } from './router.js';
 import { usePoll } from './usePoll.js';
 
@@ -35,17 +36,14 @@ export function Cover({ bookId }: { bookId: string }) {
       {book && data && (
         <>
           <h1 className="cover-title">{book.title}</h1>
-          {data.cover === 'ready' ? (
-            <img
-              className="page-image"
-              src={imageUrl(bookId, 'cover')}
-              alt=""
-            />
-          ) : (
-            data.cover === 'pending' && (
-              <p className="working image-placeholder">{t.drawingImage}</p>
-            )
-          )}
+          <PageImage
+            bookId={bookId}
+            imageId="cover"
+            status={data.cover}
+            onStatus={(cover) => setData({ ...data, cover })}
+            onError={setError}
+            texts={t}
+          />
           <p className="blurb">{book.blurb}</p>
           <p className="cover-details muted">
             {book.settings.genre} · {book.settings.style}

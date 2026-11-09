@@ -257,6 +257,41 @@ textarea {
   box-shadow: 0 1px 6px rgb(43 33 24 / 25%);
 }
 
+.image-frame {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.image-frame .page-image {
+  margin: 0;
+}
+
+.image-frame .new-image {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  border-radius: 50%;
+  background: rgb(255 250 240 / 80%);
+  font-size: 1.2rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.image-frame:hover .new-image,
+.image-frame .new-image:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .image-frame .new-image {
+    opacity: 0.8;
+  }
+}
+
 .image-placeholder {
   text-align: center;
   margin: 1.5rem 0;

@@ -25,6 +25,9 @@ and the image is made with Draw Things, which runs on the user's machine.
       it is ready.
 - [x] If Draw Things is not running, the book works without images, and the app
       tries again later.
+- [x] The user can make a new image for a page or a cover from the reader. The
+      app deletes the old image and makes a new one from the same prompt, for
+      example to try another model in Draw Things.
 
 ## Cover
 

@@ -9,6 +9,7 @@ import type {
   Language,
   PageResponse,
   PitchRequest,
+  RegenerateImageResponse,
   ToneSuggestions,
 } from '../shared/types.js';
 
@@ -47,6 +48,14 @@ export const api = {
     ),
   setPosition: (bookId: string, pageId: string) =>
     request<void>('PUT', `/api/books/${bookId}/position`, { pageId }),
+  regenerateImage: async (bookId: string, imageId: string) => {
+    const res = await request<RegenerateImageResponse>(
+      'POST',
+      `/api/books/${bookId}/images/${imageId}/regenerate`,
+    );
+    imageVersions.set(`${bookId}/${imageId}`, Date.now());
+    return res;
+  },
   suggestAuthors: (language: Language, genre: string, style: string) =>
     request<{ authors: AuthorSuggestion[] }>(
       'POST',
@@ -61,7 +70,15 @@ export const api = {
     }),
 };
 
+/**
+ * When an image is made again, its URL gets a new version, because the browser
+ * would otherwise show the old image that it has already loaded.
+ */
+const imageVersions = new Map<string, number>();
+
 /** `imageId` is a page ID, or `cover` for the cover of the book. */
 export function imageUrl(bookId: string, imageId: string): string {
-  return `/api/books/${bookId}/images/${imageId}`;
+  const version = imageVersions.get(`${bookId}/${imageId}`);
+  const url = `/api/books/${bookId}/images/${imageId}`;
+  return version ? `${url}?v=${version}` : url;
 }

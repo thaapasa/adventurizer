@@ -5,6 +5,7 @@ import {
   readdir,
   readFile,
   rename,
+  rm,
   writeFile,
 } from 'node:fs/promises';
 import path from 'node:path';
@@ -110,6 +111,10 @@ export class FileBookStore implements BookStore {
 
   async saveImage(bookId: string, imageId: string, png: Buffer): Promise<void> {
     await writeAtomic(this.imageFile(bookId, imageId), png);
+  }
+
+  async deleteImage(bookId: string, imageId: string): Promise<void> {
+    await rm(this.imageFile(bookId, imageId), { force: true });
   }
 
   private imageFile(bookId: string, imageId: string): string {

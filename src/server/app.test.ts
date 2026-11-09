@@ -5,6 +5,7 @@ import type {
   BookSummary,
   CreateBookResponse,
   PageResponse,
+  RegenerateImageResponse,
 } from '../shared/types.js';
 import { createApp } from './app.js';
 import { ImageService } from './images/image-service.js';
@@ -134,6 +135,32 @@ describe('API', () => {
     expect(await cover.text()).toBe('Cover of the test book');
     const missing = await app.request(`/api/books/${book.id}/images/nope`);
     expect(missing.status).toBe(404);
+  });
+
+  it('makes an image again on request', async () => {
+    const book = await createBook();
+    await app.request(`/api/books/${book.id}`);
+    await images.whenIdle();
+    generator.prompts.length = 0;
+
+    const regenerate = (imageId: string) =>
+      app.request(`/api/books/${book.id}/images/${imageId}/regenerate`, {
+        method: 'POST',
+      });
+    const res = await regenerate('cover');
+    expect(((await res.json()) as RegenerateImageResponse).image).toBe(
+      'pending',
+    );
+    expect(
+      (await app.request(`/api/books/${book.id}/images/cover`)).status,
+    ).toBe(404);
+    await regenerate(book.firstPageId);
+    await images.whenIdle();
+    expect(generator.prompts).toEqual([
+      'Cover of the test book',
+      'Image of Page one',
+    ]);
+    expect((await regenerate('nope')).status).toBe(404);
   });
 
   it('rejects bad input', async () => {

@@ -149,6 +149,10 @@ export interface PageResponse {
   image: ImageStatus;
 }
 
+export interface RegenerateImageResponse {
+  image: ImageStatus;
+}
+
 export interface CreateBookResponse {
   book: Book;
 }

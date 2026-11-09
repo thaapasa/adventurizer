@@ -82,6 +82,25 @@ export class ImageService {
     return 'pending';
   }
 
+  /**
+   * Deletes the image and queues a new one from the prompt. Keeps the image
+   * if there is no generator. If the image is already being made, this only
+   * moves it to the front of the queue.
+   */
+  async regenerate(
+    bookId: string,
+    imageId: string,
+    prompt: string,
+  ): Promise<ImageStatus> {
+    if (!this.generator) return this.request(bookId, imageId, prompt);
+    const key = `${bookId}/${imageId}`;
+    if (!this.pending.has(key)) {
+      await this.store.deleteImage(bookId, imageId);
+      this.failedAt.delete(key);
+    }
+    return this.request(bookId, imageId, prompt);
+  }
+
   getImage(bookId: string, imageId: string): Promise<Buffer | undefined> {
     return this.store.getImage(bookId, imageId);
   }

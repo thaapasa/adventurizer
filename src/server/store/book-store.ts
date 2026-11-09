@@ -26,6 +26,8 @@ export interface BookStore {
   getImage(bookId: string, imageId: string): Promise<Buffer | undefined>;
   hasImage(bookId: string, imageId: string): Promise<boolean>;
   saveImage(bookId: string, imageId: string, png: Buffer): Promise<void>;
+  /** Does nothing if the image is not there. */
+  deleteImage(bookId: string, imageId: string): Promise<void>;
 }
 
 /** Follows the parent links from a page back to the first page. */

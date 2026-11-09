@@ -12,6 +12,7 @@ import {
   languages,
   type Page,
   type PageResponse,
+  type RegenerateImageResponse,
   type ToneSuggestions,
 } from '../shared/types.js';
 import type { ImageService } from './images/image-service.js';
@@ -168,7 +169,26 @@ export function createApp(story: StoryService, images: ImageService): Hono {
       idParam(c, 'imageId'),
     );
     if (!png) return c.json({ error: 'Image not found' }, 404);
-    return c.body(new Uint8Array(png), 200, { 'Content-Type': 'image/png' });
+    // An image can be made again under the same URL.
+    return c.body(new Uint8Array(png), 200, {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'no-cache',
+    });
+  });
+
+  /** Deletes the image and makes a new one from the same prompt. */
+  app.post('/api/books/:bookId/images/:imageId/regenerate', async (c) => {
+    if (!images.enabled) {
+      return c.json({ error: 'The app does not make images' }, 409);
+    }
+    const book = await story.getBook(idParam(c, 'bookId'));
+    const imageId = idParam(c, 'imageId');
+    const prompt =
+      imageId === 'cover'
+        ? await story.getCoverPrompt(book)
+        : (await story.getPage(book.id, imageId)).imagePrompt;
+    const image = await images.regenerate(book.id, imageId, prompt);
+    return c.json({ image } satisfies RegenerateImageResponse);
   });
 
   app.post('/api/books/:bookId/pages/:pageId/choose', async (c) => {

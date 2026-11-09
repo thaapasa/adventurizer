@@ -50,6 +50,31 @@ describe('ImageService', () => {
     expect(await store.hasImage('b1', 'p1')).toBe(true);
   });
 
+  it('deletes an image and makes it again', async () => {
+    await images.request('b1', 'p1', 'one');
+    await images.whenIdle();
+    expect(await images.regenerate('b1', 'p1', 'one')).toBe('pending');
+    expect(await store.hasImage('b1', 'p1')).toBe(false);
+    await images.whenIdle();
+    expect(await store.hasImage('b1', 'p1')).toBe(true);
+    expect(generator.prompts).toEqual(['one', 'one']);
+  });
+
+  it('makes a failed image again at once on request', async () => {
+    generator.failing = true;
+    await images.request('b1', 'p1', 'one');
+    await images.whenIdle();
+    generator.failing = false;
+    expect(await images.regenerate('b1', 'p1', 'one')).toBe('pending');
+  });
+
+  it('keeps the image when no generator is set', async () => {
+    const off = new ImageService(store, undefined);
+    await store.saveImage('b1', 'p1', Buffer.from('png'));
+    expect(await off.regenerate('b1', 'p1', 'one')).toBe('ready');
+    expect(await store.hasImage('b1', 'p1')).toBe(true);
+  });
+
   it('shows a saved image when no generator is set', async () => {
     const off = new ImageService(store, undefined);
     expect(await off.request('b1', 'p1', 'one')).toBe('none');
